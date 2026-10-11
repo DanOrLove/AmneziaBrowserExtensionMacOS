@@ -32,33 +32,24 @@ Native Messaging host собирается для текущей архитек�
 ### Установка
 
 1. Скачайте ZIP этого репозитория и распакуйте его в постоянную папку. Не перемещайте и не удаляйте эту папку после установки: манифест Native Messaging хранит полный путь к программе.
-2. Откройте Terminal и перейдите в корневую папку распакованного проекта. Например:
+2. Дважды нажмите `install.command`. Скрипт проверит Go 1.25+, соберёт Native Messaging host, зарегистрирует его для найденных профилей Chrome/Chromium/Edge/Brave и откроет страницу расширений Chrome. При первой сборке Go скачает зависимости, поэтому нужен интернет.
+
+   Если macOS не открывает файл, щёлкните по нему правой кнопкой и выберите **Открыть**. То же самое можно сделать вручную из Terminal:
 
    ```sh
    cd ~/Downloads/AmneziaBrowserExtensionMacOS
-   ```
-
-3. Соберите локальный компонент:
-
-   ```sh
    bash ./native/build.sh
-   ```
-
-   Дождитесь сообщения `Built macOS Native Messaging host`. Сборка может занять время при первой загрузке Go-зависимостей. Если команда завершилась ошибкой, перейдите к разделу [Устранение неполадок](#устранение-неполадок) и не запускайте установку host до успешной сборки.
-
-4. Только после успешной сборки зарегистрируйте Native Messaging host:
-
-   ```sh
    bash ./native/install.sh
    ```
 
-   Сборка создаёт `native/AmneziaBrowserVpnHost`. Скрипт установки создаёт Native Messaging manifest для Chrome, Chromium, Edge и Brave в папках текущего пользователя. Оба шага нужно выполнить из корневой папки проекта.
+   Если используете Edge или Brave, сначала запустите браузер хотя бы один раз, чтобы создать его профиль. Установщик регистрирует host только в профилях браузеров, найденных на этом Mac.
 
-5. В Chrome или Chromium откройте `chrome://extensions`. Для Edge используйте `edge://extensions`, для Brave — `brave://extensions`.
-6. Включите **Режим разработчика**, нажмите **Загрузить распакованное расширение** и выберите папку `extension` внутри проекта.
-7. Подтвердите разрешения расширения для управления прокси, настройкой приватности браузера и Native Messaging.
+3. На открывшейся странице `chrome://extensions` включите **Режим разработчика**, нажмите **Загрузить распакованное расширение** и выберите папку `extension` внутри проекта.
+4. Подтвердите разрешения расширения для управления прокси, настройкой приватности браузера и Native Messaging.
 
 Если браузер был открыт во время регистрации Native Messaging, перезапустите браузер или перезагрузите расширение на странице расширений.
+
+> Chrome не позволяет обычному сайту или локальному установщику молча установить расширение из папки. Поэтому при установке из ZIP папку `extension` нужно один раз выбрать вручную. Для установки расширения в один клик его нужно опубликовать в Chrome Web Store.
 
 ### Первое подключение и использование
 
@@ -158,33 +149,24 @@ The native host is built for the Mac's current architecture and registered for t
 ### Installation
 
 1. Download this repository's ZIP and extract it to a permanent folder. Do not move or delete the folder after installation: the Native Messaging manifest stores the executable's absolute path.
-2. Open Terminal and change to the extracted project directory. For example:
+2. Double-click `install.command`. It checks for Go 1.25+, builds the Native Messaging host, registers it for existing Chrome/Chromium/Edge/Brave profiles, and opens Chrome's extensions page. The first build downloads Go dependencies and needs internet access.
+
+   If macOS will not open the file, right-click it and choose **Open**. You can also run the commands manually in Terminal:
 
    ```sh
    cd ~/Downloads/AmneziaBrowserExtensionMacOS
-   ```
-
-3. Build the local component:
-
-   ```sh
    bash ./native/build.sh
-   ```
-
-   Wait for `Built macOS Native Messaging host`. The first build may take a while while Go downloads dependencies. If the command fails, see [Troubleshooting](#troubleshooting) and do not register the host until the build succeeds.
-
-4. Register the Native Messaging host only after a successful build:
-
-   ```sh
    bash ./native/install.sh
    ```
 
-   The build creates `native/AmneziaBrowserVpnHost`. The installer registers Native Messaging for Chrome, Chromium, Edge, and Brave in the current user's profile. Run both commands from the project root.
+   If you use Edge or Brave, launch it at least once first so its profile directory exists. The installer registers the host only for browser profiles found on this Mac.
 
-5. Open `chrome://extensions` in Chrome or Chromium, `edge://extensions` in Edge, or `brave://extensions` in Brave.
-6. Enable **Developer mode**, choose **Load unpacked**, and select the repository's `extension` folder.
-7. Approve the extension permissions for proxy control, browser privacy settings, and Native Messaging.
+3. On the opened `chrome://extensions` page, enable **Developer mode**, choose **Load unpacked**, and select the repository's `extension` folder.
+4. Approve the extension permissions for proxy control, browser privacy settings, and Native Messaging.
 
 If the browser was open during Native Messaging registration, restart it or reload the extension on the extensions page.
+
+> Chrome does not allow a regular website or local installer to silently install an extension from a folder. When installing from the ZIP, you must select the `extension` folder once. One-click extension installation requires publishing it in the Chrome Web Store.
 
 ### First connection and usage
 
