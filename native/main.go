@@ -67,6 +67,12 @@ func main() {
 				os.Exit(1)
 			}
 		default:
+			// Chrome starts a Native Messaging host with its extension origin as
+			// the first argument (for example, chrome-extension://<id>/).
+			if len(os.Args) == 2 && strings.HasPrefix(os.Args[1], "chrome-extension://") {
+				runNativeHost()
+				return
+			}
 			os.Exit(2)
 		}
 		return

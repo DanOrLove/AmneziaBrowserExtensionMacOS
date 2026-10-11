@@ -95,7 +95,14 @@ bash ./native/install.sh
 
 ### Устранение неполадок
 
-- **«Native host has exited» / компонент не найден:** убедитесь, что `native/AmneziaBrowserVpnHost` существует и исполняемый. Повторите `bash ./native/install.sh`, затем перезапустите браузер.
+- **«Native host has exited» / компонент не найден:** скачайте актуальную версию проекта и пересоберите host, затем повторно зарегистрируйте его и перезапустите браузер:
+
+  ```sh
+  bash ./native/build.sh
+  bash ./native/install.sh
+  ```
+
+  Chrome передаёт Native Messaging host аргумент с origin расширения; устаревшая сборка могла завершаться при запуске.
 - **`TLS handshake timeout`, `i/o timeout` или ошибка загрузки модуля при сборке:** сборка не завершилась, поэтому Native Messaging host ещё не создан и запускать `install.sh` пока не нужно. Проверьте доступ к интернету и убедитесь, что прокси, VPN, межсетевой экран или фильтр DNS не блокирует Go Module Proxy. Для быстрой проверки выполните:
 
   ```sh
@@ -214,7 +221,14 @@ Then reload the extension on the browser's extensions page. Profiles remain in l
 
 ### Troubleshooting
 
-- **“Native host has exited” / host not found:** make sure `native/AmneziaBrowserVpnHost` exists and is executable. Rerun `bash ./native/install.sh`, then restart the browser.
+- **“Native host has exited” / host not found:** download the latest project version, rebuild the host, register it again, and restart the browser:
+
+  ```sh
+  bash ./native/build.sh
+  bash ./native/install.sh
+  ```
+
+  Chrome passes the extension origin as an argument to the Native Messaging host; an older build may exit when it starts.
 - **`TLS handshake timeout`, `i/o timeout`, or a module download error during the build:** the build did not finish, so the Native Messaging host has not been created. Do not run `install.sh` yet. Check internet access and whether a proxy, VPN, firewall, or DNS filter blocks the Go Module Proxy. To check connectivity, run:
 
   ```sh
