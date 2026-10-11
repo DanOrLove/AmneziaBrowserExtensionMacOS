@@ -4,6 +4,8 @@ A Chromium extension and local macOS Native Messaging host for using an AmneziaW
 
 ### Windows
  Отдельный репозиторий для Windows-версии: https://github.com/DanOrLove/AmneziaBrowserExtensionWindows
+### Linus 
+Отдельный репозиторий для Linus-версии: https://github.com/DanOrLove/AmneziaBrowserExtensionLinux
 
 > **Status:** early prototype. Build and connection behavior still need confirmation on a real Mac. TCP web traffic is supported; UDP traffic is not tunneled. Review [Limitations and security](#limitations-and-security) before relying on it.
 
