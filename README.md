@@ -4,8 +4,8 @@ A Chromium extension and local macOS Native Messaging host for using an AmneziaW
 
 ### Windows
  Отдельный репозиторий для Windows-версии: https://github.com/DanOrLove/AmneziaBrowserExtensionWindows
-### Linus 
-Отдельный репозиторий для Linus-версии: https://github.com/DanOrLove/AmneziaBrowserExtensionLinux
+### Linux
+Отдельный репозиторий для Linux-версии: https://github.com/DanOrLove/AmneziaBrowserExtensionLinux
 
 > **Status:** early prototype. Build and connection behavior still need confirmation on a real Mac. TCP web traffic is supported; UDP traffic is not tunneled. Review [Limitations and security](#limitations-and-security) before relying on it.
 
@@ -25,7 +25,7 @@ A Chromium extension and local macOS Native Messaging host for using an AmneziaW
 - macOS и Go 1.25 или новее.
 - Chrome, Chromium, Microsoft Edge или Brave.
 - Конфиг AmneziaWG в формате WireGuard INI (`[Interface]`, `[Peer]`).
-- Подключение к интернету во время сборки, чтобы Go загрузил зависимость `github.com/amnezia-vpn/amneziawg-go/v3`.
+- Доступ к интернету во время сборки: Go загружает все зависимости, перечисленные в `native/go.mod`, включая `github.com/amnezia-vpn/amneziawg-go/v3`.
 
 Native Messaging host собирается для текущей архитектуры Mac и регистрируется только для текущего пользователя. Для другого macOS-пользователя установку нужно повторить из его учётной записи.
 
@@ -38,18 +38,25 @@ Native Messaging host собирается для текущей архитек�
    cd ~/Downloads/AmneziaBrowserExtensionMacOS
    ```
 
-3. Соберите и зарегистрируйте локальный компонент:
+3. Соберите локальный компонент:
 
    ```sh
    bash ./native/build.sh
+   ```
+
+   Дождитесь сообщения `Built macOS Native Messaging host`. Сборка может занять время при первой загрузке Go-зависимостей. Если команда завершилась ошибкой, перейдите к разделу [Устранение неполадок](#устранение-неполадок) и не запускайте установку host до успешной сборки.
+
+4. Только после успешной сборки зарегистрируйте Native Messaging host:
+
+   ```sh
    bash ./native/install.sh
    ```
 
-   Сборка создаст `native/AmneziaBrowserVpnHost`. Скрипт установки создаст Native Messaging manifest для Chrome, Chromium, Edge и Brave в папках текущего пользователя.
+   Сборка создаёт `native/AmneziaBrowserVpnHost`. Скрипт установки создаёт Native Messaging manifest для Chrome, Chromium, Edge и Brave в папках текущего пользователя. Оба шага нужно выполнить из корневой папки проекта.
 
-4. В Chrome или Chromium откройте `chrome://extensions`. Для Edge используйте `edge://extensions`, для Brave — `brave://extensions`.
-5. Включите **Режим разработчика**, нажмите **Загрузить распакованное расширение** и выберите папку `extension` внутри проекта.
-6. Подтвердите разрешения расширения для управления прокси, настройкой приватности браузера и Native Messaging.
+5. В Chrome или Chromium откройте `chrome://extensions`. Для Edge используйте `edge://extensions`, для Brave — `brave://extensions`.
+6. Включите **Режим разработчика**, нажмите **Загрузить распакованное расширение** и выберите папку `extension` внутри проекта.
+7. Подтвердите разрешения расширения для управления прокси, настройкой приватности браузера и Native Messaging.
 
 Если браузер был открыт во время регистрации Native Messaging, перезапустите браузер или перезагрузите расширение на странице расширений.
 
@@ -89,7 +96,15 @@ bash ./native/install.sh
 ### Устранение неполадок
 
 - **«Native host has exited» / компонент не найден:** убедитесь, что `native/AmneziaBrowserVpnHost` существует и исполняемый. Повторите `bash ./native/install.sh`, затем перезапустите браузер.
-- **Ошибка Go при сборке:** проверьте `go version` (нужна версия 1.25+) и интернет-соединение; затем повторите `bash ./native/build.sh`.
+- **`TLS handshake timeout`, `i/o timeout` или ошибка загрузки модуля при сборке:** сборка не завершилась, поэтому Native Messaging host ещё не создан и запускать `install.sh` пока не нужно. Проверьте доступ к интернету и убедитесь, что прокси, VPN, межсетевой экран или фильтр DNS не блокирует Go Module Proxy. Для быстрой проверки выполните:
+
+  ```sh
+  go version
+  go env GOPROXY
+  curl -I --connect-timeout 10 --max-time 20 https://proxy.golang.org
+  ```
+
+  Для `curl` важен успешный TLS/HTTP-ответ; `404` или `405` на корневом адресе тоже означает, что сервер доступен. После восстановления доступа повторите `bash ./native/build.sh`. Если ошибка указывает на другой домен, например `go.googlesource.com` или `gvisor.dev`, доступ к нему также нужен. `GOPROXY=direct` может помочь только если сеть позволяет Go скачать все модули напрямую; этот режим не обходит блокировки сети. Установка Go или добавление его в `PATH` не исправляет тайм-аут загрузки модулей.
 - **Порт 1080 занят:** закройте приложение, использующее `127.0.0.1:1080`, и подключитесь снова.
 - **Сайт не открывается:** проверьте доступность сервера, `PrivateKey`/`PublicKey`, `Endpoint` и параметры обфускации. Журнал компонента находится в `~/Library/Application Support/AmneziaBrowserVPN/proxy.log`.
 - **Расширение не может изменить прокси или WebRTC:** проверьте политики браузера и другие расширения, которые управляют теми же настройками.
@@ -129,7 +144,7 @@ bash ./native/install.sh
 - macOS and Go 1.25 or later.
 - Chrome, Chromium, Microsoft Edge, or Brave.
 - An AmneziaWG profile in WireGuard INI format (`[Interface]`, `[Peer]`).
-- Internet access during the build so Go can download `github.com/amnezia-vpn/amneziawg-go/v3`.
+- Internet access during the build so Go can download all modules listed in `native/go.mod`, including `github.com/amnezia-vpn/amneziawg-go/v3`.
 
 The native host is built for the Mac's current architecture and registered for the current macOS user. Repeat installation from each account that needs to use the extension.
 
@@ -142,18 +157,25 @@ The native host is built for the Mac's current architecture and registered for t
    cd ~/Downloads/AmneziaBrowserExtensionMacOS
    ```
 
-3. Build and register the local component:
+3. Build the local component:
 
    ```sh
    bash ./native/build.sh
+   ```
+
+   Wait for `Built macOS Native Messaging host`. The first build may take a while while Go downloads dependencies. If the command fails, see [Troubleshooting](#troubleshooting) and do not register the host until the build succeeds.
+
+4. Register the Native Messaging host only after a successful build:
+
+   ```sh
    bash ./native/install.sh
    ```
 
-   The build creates `native/AmneziaBrowserVpnHost`. The installer registers Native Messaging for Chrome, Chromium, Edge, and Brave in the current user's profile.
+   The build creates `native/AmneziaBrowserVpnHost`. The installer registers Native Messaging for Chrome, Chromium, Edge, and Brave in the current user's profile. Run both commands from the project root.
 
-4. Open `chrome://extensions` in Chrome or Chromium, `edge://extensions` in Edge, or `brave://extensions` in Brave.
-5. Enable **Developer mode**, choose **Load unpacked**, and select the repository's `extension` folder.
-6. Approve the extension permissions for proxy control, browser privacy settings, and Native Messaging.
+5. Open `chrome://extensions` in Chrome or Chromium, `edge://extensions` in Edge, or `brave://extensions` in Brave.
+6. Enable **Developer mode**, choose **Load unpacked**, and select the repository's `extension` folder.
+7. Approve the extension permissions for proxy control, browser privacy settings, and Native Messaging.
 
 If the browser was open during Native Messaging registration, restart it or reload the extension on the extensions page.
 
@@ -193,7 +215,15 @@ Then reload the extension on the browser's extensions page. Profiles remain in l
 ### Troubleshooting
 
 - **“Native host has exited” / host not found:** make sure `native/AmneziaBrowserVpnHost` exists and is executable. Rerun `bash ./native/install.sh`, then restart the browser.
-- **Go build error:** check `go version` (1.25 or later is required) and internet access, then rerun `bash ./native/build.sh`.
+- **`TLS handshake timeout`, `i/o timeout`, or a module download error during the build:** the build did not finish, so the Native Messaging host has not been created. Do not run `install.sh` yet. Check internet access and whether a proxy, VPN, firewall, or DNS filter blocks the Go Module Proxy. To check connectivity, run:
+
+  ```sh
+  go version
+  go env GOPROXY
+  curl -I --connect-timeout 10 --max-time 20 https://proxy.golang.org
+  ```
+
+  `curl` must complete the TLS connection and receive an HTTP response; `404` or `405` from the root URL also confirms that the server is reachable. Once access is restored, rerun `bash ./native/build.sh`. If the error names another domain, such as `go.googlesource.com` or `gvisor.dev`, access to that domain is also required. `GOPROXY=direct` can work only when the network allows Go to fetch every module directly; it does not bypass network blocks. Installing Go or adding it to `PATH` does not fix module download timeouts.
 - **Port 1080 is busy:** close the application using `127.0.0.1:1080` and retry.
 - **A website does not load:** check server availability, `PrivateKey`/`PublicKey`, `Endpoint`, and obfuscation settings. The component log is at `~/Library/Application Support/AmneziaBrowserVPN/proxy.log`.
 - **The extension cannot change proxy or WebRTC settings:** check browser policies and other extensions that may control the same settings.
